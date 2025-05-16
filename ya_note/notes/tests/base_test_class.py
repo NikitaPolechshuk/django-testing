@@ -5,7 +5,7 @@ from django.test import TestCase
 
 
 class BaseTestClass(TestCase):
-    """Базовый класс тестирования. """
+    """Базовый класс тестирования."""
 
     TEST_SLUG = 'test-slug'
 
