@@ -1,3 +1,5 @@
+import pytest
+
 from http import HTTPStatus
 
 from pytest_django.asserts import assertRedirects, assertFormError
@@ -36,21 +38,24 @@ def test_user_can_create_comment(
     assert comment.author == author
 
 
+@pytest.mark.parametrize(
+    'bad_word',
+    (BAD_WORDS),
+)
 def test_user_cant_use_bad_words(
-    author_client, one_news
+    bad_word, author_client, one_news
 ):
     """Проверка использования плохих слов."""
     url = reverse(settings.NEWS_DETAIL_NAME, args=(one_news.pk,))
-    for bad_word in BAD_WORDS:
-        response = author_client.post(url, data={'text': bad_word})
-        form = response.context['form']
-        assertFormError(
-            form=form,
-            field='text',
-            errors=WARNING
-        )
-        # Дополнительно убедимся, что комментарий не был создан.
-        assert Comment.objects.count() == 0
+    response = author_client.post(url, data={'text': bad_word})
+    form = response.context['form']
+    assertFormError(
+        form=form,
+        field='text',
+        errors=WARNING
+    )
+    # Дополнительно убедимся, что комментарий не был создан.
+    assert Comment.objects.count() == 0
 
 
 def test_author_can_delete_comment(one_comment, author_client):
