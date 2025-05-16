@@ -1,27 +1,21 @@
 """Тесты контента."""
-
 from django.contrib.auth import get_user_model
-from django.test import TestCase
 from django.urls import reverse
-
 
 from notes.models import Note
 from notes.forms import NoteForm
+from notes.tests.base_test_class import BaseTestClass
 
-NOTES_LIST_URL = reverse('notes:list')
-NOTES_ADD_NAME = 'notes:add'
-NOTES_EDIT_NAME = 'notes:edit'
 
 User = get_user_model()
 
 
-class TestPages(TestCase):
+class TestPages(BaseTestClass):
     """Проверка страниц."""
 
     @classmethod
     def setUpTestData(cls):
-        """Подготовка данных для тестирования."""
-        cls.authors_names = ('Лев Толстой', 'Вася Пупкин')
+        super().setUpTestData()
         cls.authors = []
         cls.notes = []
         # Создадим по одной заметки от каждого из двух авторов
@@ -29,8 +23,8 @@ class TestPages(TestCase):
             current_author = User.objects.create(username=author_name)
             cls.authors.append(current_author)
             cls.notes.append(Note.objects.create(
-                title='Заголовок ' + author_name,
-                text='Текст заметки',
+                title=cls.NOTE_TITLE + author_name,
+                text=cls.NOTE_TEXT,
                 author=current_author,
             ))
 
@@ -40,7 +34,7 @@ class TestPages(TestCase):
         """
         # Логинимся первым пользователем и загружаем список заметок
         self.client.force_login(self.authors[0])
-        response = self.client.get(NOTES_LIST_URL)
+        response = self.client.get(self.NOTES_LIST_URL)
         # Проверка что object_list существует
         self.assertIn('object_list', response.context)
         object_list = response.context['object_list']
@@ -55,8 +49,8 @@ class TestPages(TestCase):
         """Проверка наличия формы на страницах создания и редактирования.
         Для проверки используем первого юзера и его первую заметку
         """
-        urls = ((NOTES_ADD_NAME, None),
-                (NOTES_EDIT_NAME, (self.notes[0].slug, )),
+        urls = ((self.NOTES_ADD_NAME, None),
+                (self.NOTES_EDIT_NAME, (self.notes[0].slug, )),
                 )
         # Авторизуем клиент при помощи первого пользователя.
         self.client.force_login(self.authors[0])
