@@ -38,8 +38,8 @@ def not_author_client(not_author):
 @pytest.fixture
 def one_news():
     return News.objects.create(
-        title='Заголовок одиночной новости',
-        text='Текст одиночной новости',
+        title=settings.NEWS_TITLE,
+        text=settings.NEWS_TEXT,
     )
 
 

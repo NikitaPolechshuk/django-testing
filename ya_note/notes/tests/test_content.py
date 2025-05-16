@@ -16,24 +16,24 @@ class TestPages(BaseTestClass):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        cls.authors = []
-        cls.notes = []
-        # Создадим по одной заметки от каждого из двух авторов
-        for author_name in cls.authors_names:
-            current_author = User.objects.create(username=author_name)
-            cls.authors.append(current_author)
-            cls.notes.append(Note.objects.create(
-                title=cls.NOTE_TITLE + author_name,
-                text=cls.NOTE_TEXT,
-                author=current_author,
-            ))
+        # Создадим по одной заметки от каждого из двух юзер
+        cls.author_note = Note.objects.create(
+            title=cls.NOTE_TITLE + cls.AUTHOR_NAME,
+            text=cls.NOTE_TEXT,
+            author=cls.author,
+        )
+        cls.reader_note = Note.objects.create(
+            title=cls.NOTE_TITLE + cls.READER_NAME,
+            text=cls.NOTE_TEXT,
+            author=cls.reader,
+        )
 
     def test_notes(self):
         """Проверка что записи на странице list передаются в object_list
         И проверка что отображаются только записи автора.
         """
-        # Логинимся первым пользователем и загружаем список заметок
-        self.client.force_login(self.authors[0])
+        # Логинимся пользователем author и загружаем список заметок
+        self.client.force_login(self.author)
         response = self.client.get(self.NOTES_LIST_URL)
         # Проверка что object_list существует
         self.assertIn('object_list', response.context)
@@ -43,17 +43,17 @@ class TestPages(BaseTestClass):
         # Проверяем, что на странице одна запись
         self.assertEqual(count, 1)
         # Проверяем что запись пренадлежит юзеру
-        self.assertEqual(object_list[0].author, self.authors[0])
+        self.assertEqual(object_list[0].author, self.author)
 
     def test_authorized_client_has_form(self):
         """Проверка наличия формы на страницах создания и редактирования.
-        Для проверки используем первого юзера и его первую заметку
+        Для проверки используем author и его заметку
         """
         urls = ((self.NOTES_ADD_NAME, None),
-                (self.NOTES_EDIT_NAME, (self.notes[0].slug, )),
+                (self.NOTES_EDIT_NAME, (self.author_note.slug, )),
                 )
-        # Авторизуем клиент при помощи первого пользователя.
-        self.client.force_login(self.authors[0])
+        # Авторизуем клиент при помощи пользователя author.
+        self.client.force_login(self.author)
         for name, args in urls:
             with self.subTest(name=name, args=args):
                 response = self.client.get(reverse(name, args=args))

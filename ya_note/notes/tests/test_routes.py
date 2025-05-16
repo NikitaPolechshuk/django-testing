@@ -16,9 +16,6 @@ class TestRoutes(BaseTestClass):
     def setUpTestData(cls):
         """Подготовка данных для тестирования."""
         super().setUpTestData()
-        # Создаём двух пользователей с разными именами:
-        cls.author = User.objects.create(username=cls.authors_names[0])
-        cls.reader = User.objects.create(username=cls.authors_names[1])
         # От имени author  создаём записку:
         cls.note = Note.objects.create(
             title=cls.NOTE_TITLE,

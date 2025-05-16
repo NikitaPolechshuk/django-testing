@@ -2,6 +2,9 @@ import string
 
 from django.urls import reverse
 from django.test import TestCase
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class BaseTestClass(TestCase):
@@ -12,6 +15,9 @@ class BaseTestClass(TestCase):
     NOTE_TITLE = 'Заголовок'
     NOTE_TEXT = 'Текст заметки'
     NEW_NOTE_TEXT = 'Обновлённый текст'
+
+    AUTHOR_NAME = 'Лев Толстой'
+    READER_NAME = 'Вася Пупкин'
 
     NOTES_ADD_NAME = 'notes:add'
     NOTES_EDIT_NAME = 'notes:edit'
@@ -37,4 +43,6 @@ class BaseTestClass(TestCase):
     @classmethod
     def setUpTestData(cls):
         """Подготовка данных для тестирования."""
-        cls.authors_names = ('Лев Толстой', 'Вася Пупкин')
+        # Создаём двух пользователей с разными именами:
+        cls.author = User.objects.create(username=cls.AUTHOR_NAME)
+        cls.reader = User.objects.create(username=cls.READER_NAME)

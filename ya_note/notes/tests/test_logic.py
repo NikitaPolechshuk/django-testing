@@ -20,14 +20,13 @@ class TestCommentCreation(BaseTestClass):
     def setUpTestData(cls):
         """Подготовка данных для тестирования."""
         super().setUpTestData()
-        # Создаём пользователя и клиент, логинимся в клиенте.
-        cls.user = User.objects.create(username=cls.authors_names[0])
-        cls.auth_client = Client()
-        cls.auth_client.force_login(cls.user)
-        # Создадим одну запись в БД от имени нашего юзера без указания slug
+        # Создаём клиент для auhor, логинимся в клиенте.
+        cls.author_client = Client()
+        cls.author_client.force_login(cls.author)
+        # Создадим одну запись в БД от имени author без указания slug
         cls.note_data = {'title': cls.NOTE_TITLE,
                          'text': cls.NOTE_TEXT,
-                         'author': cls.user}
+                         'author': cls.author}
         cls.note = Note.objects.create(title=cls.note_data['title'],
                                        text=cls.note_data['text'],
                                        author=cls.note_data['author'])
@@ -55,8 +54,8 @@ class TestCommentCreation(BaseTestClass):
         form_data = self.form_data_empty_slug
         form_data['slug'] = self.TEST_SLUG
         # Совершаем запрос через авторизованный клиент.
-        response = self.auth_client.post(self.NOTES_ADD_URL,
-                                         data=form_data)
+        response = self.author_client.post(self.NOTES_ADD_URL,
+                                           data=form_data)
         # Проверяем, что редирект привёл к странице успешного добавления
         self.assertRedirects(response, self.NOTES_SUCCESS_URL)
         # Убеждаемся, что записей теперь на 1шт больше
@@ -67,13 +66,13 @@ class TestCommentCreation(BaseTestClass):
         self.assertEqual(new_note.title, form_data['title'])
         self.assertEqual(new_note.text, form_data['text'])
         self.assertEqual(new_note.slug, form_data['slug'])
-        self.assertEqual(new_note.author, self.user)
+        self.assertEqual(new_note.author, self.author)
 
     def test_correct_slug(self):
         """Проверка правильности формирования slug из title."""
-        # Совершаем запрос через авторизованный клиент.
-        response = self.auth_client.post(self.NOTES_ADD_URL,
-                                         data=self.form_data_empty_slug)
+        # Совершаем запрос через авторизованный клиент author.
+        response = self.author_client.post(self.NOTES_ADD_URL,
+                                           data=self.form_data_empty_slug)
         # Проверяем, что редирект привёл к странице успешного добавления
         self.assertRedirects(response, self.NOTES_SUCCESS_URL)
         # Убеждаемся, что записей теперь на 1шт больше
@@ -86,7 +85,7 @@ class TestCommentCreation(BaseTestClass):
         # при автозаполнение поля slug происходят сбои с другими полями.
         self.assertEqual(note.title, self.form_data_empty_slug['title'])
         self.assertEqual(note.text, self.form_data_empty_slug['text'])
-        self.assertEqual(note.author, self.user)
+        self.assertEqual(note.author, self.author)
         # Проверяем что slug правильно сформирован из заголовка
         self.assertEqual(note.slug,
                          slugify(self.form_data_empty_slug['title']))
@@ -94,8 +93,8 @@ class TestCommentCreation(BaseTestClass):
     def test_cannot_create_note_with_same_slug(self):
         """Проверка не возможности создать заметку с одинаковым slug."""
         # Отправим POST запрос с такими же данными что в фикстуре
-        response = self.auth_client.post(self.NOTES_ADD_URL,
-                                         data=self.note_data)
+        response = self.author_client.post(self.NOTES_ADD_URL,
+                                           data=self.note_data)
         form = response.context['form']
         # Проверим что форма вернула ошибку
         self.assertFormError(form, 'slug', Note.objects.last().slug + WARNING)
@@ -110,12 +109,9 @@ class TestNoteEditDelete(BaseTestClass):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        # Создаём клиент для пользователя-автора.
-        cls.author = User.objects.create(username=cls.authors_names[0])
+        # Создаём клиентов для пользователей и залогинимся
         cls.author_client = Client()
         cls.author_client.force_login(cls.author)
-        # Делаем всё то же самое для пользователя-читателя.
-        cls.reader = User.objects.create(username=cls.authors_names[1])
         cls.reader_client = Client()
         cls.reader_client.force_login(cls.reader)
         # Создадим запись от имени автора
