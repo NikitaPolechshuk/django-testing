@@ -6,11 +6,6 @@ from news.forms import CommentForm
 from news.pytest_tests import settings
 
 
-@pytest.fixture(autouse=True)
-def enable_db_access_for_all_tests(db):
-    pass
-
-
 def test_news_count(a_lot_of_news, client):
     """Проверка количества новостей на главной странице."""
     response = client.get(reverse(settings.NEWS_HOME_NAME))

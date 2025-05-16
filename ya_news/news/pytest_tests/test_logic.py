@@ -1,5 +1,3 @@
-import pytest
-
 from http import HTTPStatus
 
 from pytest_django.asserts import assertRedirects, assertFormError
@@ -9,11 +7,6 @@ from django.urls import reverse
 from news.forms import BAD_WORDS, WARNING
 from news.models import Comment
 from news.pytest_tests import settings
-
-
-@pytest.fixture(autouse=True)
-def enable_db_access_for_all_tests(db):
-    pass
 
 
 def test_anonymous_user_cant_create_comment(

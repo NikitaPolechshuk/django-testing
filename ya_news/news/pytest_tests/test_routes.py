@@ -8,11 +8,6 @@ from pytest_django.asserts import assertRedirects
 from news.pytest_tests import settings
 
 
-@pytest.fixture(autouse=True)
-def enable_db_access_for_all_tests(db):
-    pass
-
-
 @pytest.mark.parametrize(
     'name, args',
     (

@@ -9,6 +9,11 @@ from news.models import News, Comment
 from news.pytest_tests import settings
 
 
+@pytest.fixture(autouse=True)
+def enable_db_access_for_all_tests(db):
+    pass
+
+
 @pytest.fixture
 def author(django_user_model):
     return django_user_model.objects.create(
